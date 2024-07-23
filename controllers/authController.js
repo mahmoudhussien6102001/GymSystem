@@ -86,7 +86,7 @@ exports.protect = async (req, res, next) => {
         }
 
         // Verify token
-        const decoded = await promisify(jwt.verify)(token, 'my_ultra_secure_and_awad_long_secret');
+        const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
         console.log(decoded);
 

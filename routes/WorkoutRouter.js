@@ -7,7 +7,7 @@ router.use(authController.protect);
 
 router
   .route('/')
-  .get(WorkoutController.getWorkOut)
+  .get(WorkoutController.getWorkout)
   .post(WorkoutController.createWorkout);
 
 router

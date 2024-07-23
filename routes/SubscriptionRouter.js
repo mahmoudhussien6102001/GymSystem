@@ -1,14 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const subscriptionController = require('../controllers/SubscriptionController');
+const authController = require('../controllers/authController');
 
-router
-  .route('/')
-  .get(subscriptionController.getSubscription)
-  .post(subscriptionController.cerateSubscription);
+// Protect all routes after this middleware
+router.use(authController.protect);
 
-router
-  .route('/:subscriptionId')
+router.route('/')
+  .get(subscriptionController.getSubscriptions)
+  .post(subscriptionController.createSubscription);
+
+router.route('/:subscriptionId')
   .get(subscriptionController.getSubscriptionById)
   .patch(subscriptionController.updateSubscription)
   .delete(subscriptionController.deleteSubscription);

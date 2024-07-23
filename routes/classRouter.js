@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const classController = require('../controllers/ClassController');
+const authController = require('../controllers/authController');
 
 router
   .route('/')
-  .get(classController.getClass)
-  .post(classController.createClass);
-
+  .get(authController.protect,authController.restrictTo("admin","member"),classController.getClass)
+  .post(authController.protect,authController.restrictTo('admin'),classController.createClass);
+  
+router.use(authController.protect,authController.restrictTo('admin'));
 router
   .route('/:classId')
   .get(classController.getClassById)

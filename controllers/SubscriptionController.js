@@ -1,104 +1,89 @@
-const Subscription= require('./../models/Subscription');
-const  catchAsync = require ('./../utils/catchAsync') ;
-const ApiError = require('./../utils/ApiError') ;
+const Subscription = require('../models/Subscription');
+const catchAsync = require('../utils/catchAsync');
+const ApiError = require('../utils/ApiError');
 
+exports.getSubscriptions = catchAsync(async (req, res, next) => {
+  const subscriptions = await Subscription.find({ userId: req.user._id }).populate('planId');
 
-exports.getSubscription =catchAsync(async(req,res,next)=>{
-
-    const Subscription = await Subscription.find({ userId: req.user.userId }).populate('planId');
-    if(!Subscription) {
-        next (new ApiError('not fount Subscription' ,404))
-    }
-    res.status(200).json({
-        status:'success' ,
-        data :{
-            data :Subscription
-        }
-
-    })
-
-});
-
-
-exports.cerateSubscription = catchAsync(async(req,res)=>{
-    const { planId } = req.body;
-  const plan = await MembershipPlan.findById(planId);
-
-  if (!plan) {
-    return res.status(400).json({ message: 'Invalid plan' });
+  if (!subscriptions.length) {
+    return next(new ApiError('No subscriptions found', 404));
   }
 
-  const endDate = new Date();
-  endDate.setMonth(endDate.getMonth() + plan.duration);
-    const Subscription = await Subscription.create({userId: req.user.userId,
-        planId,
-        endDate}) ;
-
-    res.status(200).json({
-        status:'success' ,
-        data :{
-            data :Subscription
-        }
-
-    })
+  res.status(200).json({
+    status: 'success',
+    data: {
+      subscriptions
+    }
+  });
 });
 
+exports.createSubscription = catchAsync(async (req, res) => {
+  const { planId, startDate, endDate } = req.body;
+  const newSubscription = await Subscription.create({
+    userId: req.user._id,
+    planId,
+    startDate,
+    endDate
+  });
+
+  res.status(201).json({
+    status: 'success',
+    data: {
+      subscription: newSubscription
+    }
+  });
+});
 
 exports.updateSubscription = catchAsync(async (req, res, next) => {
-    const { subscriptionId } = req.params;
-    const { planId } = req.body;
+  const { subscriptionId } = req.params;
+  const { planId, startDate, endDate } = req.body;
 
-    const plan = await MembershipPlan.findById(planId);
-    if (!plan) {
-        return res.status(400).json({ message: 'Invalid plan' });
+  const updatedSubscription = await Subscription.findByIdAndUpdate(
+    subscriptionId,
+    { planId, startDate, endDate },
+    { new: true, runValidators: true }
+  );
+
+  if (!updatedSubscription) {
+    return next(new ApiError('Subscription not found', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      subscription: updatedSubscription
     }
-
-    const endDate = new Date();
-    endDate.setMonth(endDate.getMonth() + plan.duration);
-
-    const updatedSubscription = await Subscription.findByIdAndUpdate(subscriptionId, {
-        planId,
-        endDate
-    }, { new: true });
-
-    if (!updatedSubscription) {
-        return next(new ApiError('Subscription not found', 404));
-    }
-
-    res.status(200).json({
-        status: 'success',
-        data: {
-            data: updatedSubscription
-        }
-    });
+  });
 });
+
 exports.deleteSubscription = catchAsync(async (req, res, next) => {
-    const { subscriptionId } = req.params;
+  const { subscriptionId } = req.params;
 
-    const deletedSubscription = await Subscription.findByIdAndDelete(subscriptionId);
+  const deletedSubscription = await Subscription.findByIdAndDelete(subscriptionId);
 
-    if (!deletedSubscription) {
-        return next(new ApiError('Subscription not found', 404));
-    }
+  if (!deletedSubscription) {
+    return next(new ApiError('Subscription not found', 404));
+  }
 
-    res.status(204).json({
-        status: 'success',
-        data: null
-    });
+  res.status(204).json({
+    status: 'success',
+    data: null
+  });
 });
+
 exports.getSubscriptionById = catchAsync(async (req, res, next) => {
-    const { subscriptionId } = req.params;
+  const { subscriptionId } = req.params;
 
-    const subscription = await Subscription.findById(subscriptionId).populate('planId');
+  const subscription = await Subscription.findById(subscriptionId).populate('planId');
 
-    if (!subscription) {
-        return next(new ApiError('Subscription not found', 404));
+  if (!subscription) {
+    return next(new ApiError('Subscription not found', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      subscription
     }
-
-    res.status(200).json({
-        status: 'success',
-        data: {
-            data: subscription
-        }
-    });
+  });
 });

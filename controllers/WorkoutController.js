@@ -1,35 +1,32 @@
-const Workout  = require ('./../models/workOut') ;
-const  catchAsync = require ('./../utils/catchAsync') ;
-const ApiError = require('./../utils/ApiError') ;
- 
+const Workout = require('../models/workOut');
+const catchAsync = require('../utils/catchAsync');
+const ApiError = require('../utils/ApiError');
 
+exports.getWorkout = catchAsync(async (req, res, next) => {
+    const workouts = await Workout.find({ userId: req.user._id });
 
-
-
-exports.getWorkOut = catchAsync(async (req,res,next)=>{
-   
-    const workOut = await Workout.find({ userId: req.user.userId}) ;
-    if(!workOut){
-        next (new ApiError('not fount Workout' ,404))
+    if (!workouts) {
+        return next(new ApiError('No workouts found', 404));
     }
-    res.status(200).json({
-        status : 'success',
-        data :{
-            workOut : workOut
-        }
-    })
-})
 
-
-exports.createWorkout =catchAsync(async(req,res)=>{
-    const {exercises} = req.body;
-    const newWorkout = await Workout.create({ userId: req.user.userId, exercises }) ;
     res.status(200).json({
-        status : 'success',
-        data :{
-            workOut : workOut
+        status: 'success',
+        data: {
+            workouts
         }
-    })
+    });
+});
+
+exports.createWorkout = catchAsync(async (req, res) => {
+    const { exercises } = req.body;
+    const newWorkout = await Workout.create({ userId: req.user._id, exercises });
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            workout: newWorkout
+        }
+    });
 });
 
 exports.updateWorkout = catchAsync(async (req, res, next) => {
@@ -45,10 +42,11 @@ exports.updateWorkout = catchAsync(async (req, res, next) => {
     res.status(200).json({
         status: 'success',
         data: {
-            workOut: updatedWorkout
+            workout: updatedWorkout
         }
     });
 });
+
 exports.deleteWorkout = catchAsync(async (req, res, next) => {
     const { workoutId } = req.params;
 
@@ -63,6 +61,7 @@ exports.deleteWorkout = catchAsync(async (req, res, next) => {
         data: null
     });
 });
+
 exports.getWorkoutById = catchAsync(async (req, res, next) => {
     const { workoutId } = req.params;
 
@@ -75,7 +74,7 @@ exports.getWorkoutById = catchAsync(async (req, res, next) => {
     res.status(200).json({
         status: 'success',
         data: {
-            workOut: workout
+            workout
         }
     });
 });

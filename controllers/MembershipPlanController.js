@@ -5,14 +5,15 @@ const ApiError = require('./../utils/ApiError') ;
 
 exports.getMembershipPlan =catchAsync(async(req,res,next)=>{
 
-    const MembershipPlan = await MembershipPlan.find();
+    const Members = await MembershipPlan.find({});
     if(!MembershipPlan) {
         next (new ApiError('not fount MembershipPlan' ,404))
     }
     res.status(200).json({
         status:'success' ,
+        result:Members.length,
         data :{
-            data :MembershipPlan
+            data :Members
         }
 
     })
